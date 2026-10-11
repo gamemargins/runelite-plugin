@@ -193,7 +193,9 @@ public class GameMarginsPanel extends PluginPanel
 		}
 		else if (v.lastSyncAt == 0)
 		{
-			sync = v.queued > 0 ? v.queued + " to send" : "Nothing sent yet";
+			// Nothing sent since RuneLite started, and nothing waiting: the site has all there is. ("Nothing sent
+			// yet" read as if the link didn't work, while today's profit above had just come from the site.)
+			sync = v.queued > 0 ? v.queued + " to send" : "Up to date";
 		}
 		else
 		{
