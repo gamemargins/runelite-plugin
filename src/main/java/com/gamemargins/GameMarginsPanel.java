@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.GridLayout;
 import java.text.NumberFormat;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -35,6 +34,11 @@ public class GameMarginsPanel extends PluginPanel
 	private static final Color GREEN = new Color(55, 240, 70);
 	private static final Color AMBER = new Color(230, 150, 30);
 	private static final Color DIM = new Color(143, 143, 143);
+	/**
+	 * Where text wraps, in CSS pixels: Swing's HTML counts a CSS pixel as 1.3 screen pixels, so this keeps the
+	 * text 40 pixels inside the panel (a CSS width of PANEL_WIDTH - 40 ran past the edge and was cut off).
+	 */
+	private static final int WRAP_WIDTH = Math.round((PANEL_WIDTH - 40) / 1.3f);
 
 	/** What the panel shows, taken off the plugin's state on the client thread. */
 	public static class View
@@ -135,17 +139,18 @@ public class GameMarginsPanel extends PluginPanel
 		}
 		else
 		{
-			JPanel head = new JPanel(new BorderLayout());
+			JPanel head = new JPanel(new BorderLayout(6, 0));
 			head.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 			head.setBorder(BorderFactory.createEmptyBorder(5, 8, 5, 8));
 			head.setAlignmentX(LEFT_ALIGNMENT);
 			JLabel account = new JLabel(v.accountName == null ? "Account" : v.accountName);
 			account.setForeground(Color.WHITE);
-			head.add(account, BorderLayout.WEST);
+			head.add(account, BorderLayout.CENTER);
 			if (v.todayProfit != null)
 			{
-				JLabel today = new JLabel((v.todayProfit >= 0 ? "+" : "") + n.format(v.todayProfit) + " today");
-				today.setForeground(v.todayProfit >= 0 ? GREEN : Color.RED);
+				long profit = v.todayProfit;
+				JLabel today = new JLabel((profit > 0 ? "+" : "") + n.format(profit) + " today");
+				today.setForeground(profit > 0 ? GREEN : profit < 0 ? Color.RED : DIM);
 				today.setToolTipText(v.todayTrades == null ? null : v.todayTrades + " trades sold today, profit after tax");
 				head.add(today, BorderLayout.EAST);
 			}
@@ -179,13 +184,13 @@ public class GameMarginsPanel extends PluginPanel
 			long now = System.currentTimeMillis();
 			for (BuyLimits.Window w : v.windows)
 			{
-				JPanel row = new JPanel(new BorderLayout());
+				JPanel row = new JPanel(new BorderLayout(6, 0));
 				row.setBackground(ColorScheme.DARK_GRAY_COLOR);
 				row.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, ColorScheme.MEDIUM_GRAY_COLOR));
 				row.setAlignmentX(LEFT_ALIGNMENT);
 				JLabel name = new JLabel(v.nameOf.apply(w.getItemId()));
 				name.setForeground(Color.WHITE);
-				row.add(name, BorderLayout.WEST);
+				row.add(name, BorderLayout.CENTER);
 				String left = w.getLeft() < 0 ? n.format(w.getUsed()) + " bought" : w.getLeft() == 0 ? "full" : n.format(w.getLeft()) + " left";
 				JLabel when = new JLabel(left + " · " + CLOCK.format(Instant.ofEpochMilli(w.getResets())));
 				when.setForeground(w.getLeft() == 0 ? AMBER : DIM);
@@ -229,15 +234,19 @@ public class GameMarginsPanel extends PluginPanel
 		row.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		row.setBorder(BorderFactory.createEmptyBorder(5, 8, 5, 8));
 		row.setAlignmentX(LEFT_ALIGNMENT);
-		JPanel line = new JPanel(new GridLayout(1, 2));
+		// Everything in the row lines up on the left: BoxLayout puts a left-aligned label (the price) at the
+		// middle of panels that are centred by default.
+		JPanel line = new JPanel(new BorderLayout(6, 0));
 		line.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		line.setAlignmentX(LEFT_ALIGNMENT);
 		JLabel item = new JLabel(name);
 		item.setForeground(Color.WHITE);
-		line.add(item);
+		// The name takes what the numbers leave, and is shortened with "…" when it doesn't fit.
+		line.add(item, BorderLayout.CENTER);
 		String state = s.isCancelled() ? "Cancelled" : s.isFinished() ? "Done" : s.isBuy() ? "Buy" : "Sell";
 		JLabel right = new JLabel(state + " " + n.format(s.getFilled()) + " / " + n.format(s.getQuantity()), SwingConstants.RIGHT);
 		right.setForeground(s.isCancelled() ? Color.RED : s.isFinished() ? GREEN : DIM);
-		line.add(right);
+		line.add(right, BorderLayout.EAST);
 		row.add(line);
 		ProgressBar bar = new ProgressBar();
 		bar.setMaximumValue(Math.max(1, s.getQuantity()));
@@ -246,11 +255,13 @@ public class GameMarginsPanel extends PluginPanel
 		bar.setForeground(s.isFinished() && !s.isCancelled() ? GREEN : AMBER);
 		bar.setPreferredSize(new Dimension(PANEL_WIDTH - 40, 6));
 		bar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 6));
+		bar.setAlignmentX(LEFT_ALIGNMENT);
 		row.add(Box.createVerticalStrut(3));
 		row.add(bar);
 		JLabel price = new JLabel(n.format(s.getPrice()) + " each");
 		price.setForeground(DIM);
 		price.setFont(FontManager.getRunescapeSmallFont());
+		price.setAlignmentX(LEFT_ALIGNMENT);
 		row.add(price);
 		return row;
 	}
@@ -266,7 +277,7 @@ public class GameMarginsPanel extends PluginPanel
 
 	private static JLabel text(String s, Color color)
 	{
-		JLabel label = new JLabel("<html><div style='width:" + (PANEL_WIDTH - 40) + "px'>" + escape(s) + "</div></html>");
+		JLabel label = new JLabel("<html><div style='width:" + WRAP_WIDTH + "px'>" + escape(s) + "</div></html>");
 		label.setForeground(color);
 		label.setFont(FontManager.getRunescapeSmallFont());
 		label.setAlignmentX(LEFT_ALIGNMENT);
