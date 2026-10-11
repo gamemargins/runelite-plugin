@@ -93,3 +93,7 @@ ask for from every plugin that talks to a third-party server.
 ## License
 
 BSD 2-Clause, see `LICENSE`.
+
+The panel's letter is Geist, the letter of gamemargins.com: the font files in `src/main/resources/com/gamemargins/fonts/`
+are © The Geist Project Authors (https://github.com/vercel/geist-font, release 1.7.2), under the SIL Open Font
+License 1.1 (`OFL.txt` next to them).

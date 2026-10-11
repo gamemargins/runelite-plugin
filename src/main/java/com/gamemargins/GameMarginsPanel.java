@@ -15,10 +15,8 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import net.runelite.client.ui.ColorScheme;
-import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.ui.components.ProgressBar;
 
@@ -26,7 +24,7 @@ import net.runelite.client.ui.components.ProgressBar;
  * The side panel (decision 3B/3C): link status with the code while linking, the account and today's profit
  * (from the site), the eight slots with their progress, the buy limits with their countdowns, and when the
  * site last took a batch. Rebuilt from a snapshot the plugin hands it ({@link #show}); everything here runs
- * on the Swing thread.
+ * on the Swing thread. Every line of text is in Geist, the site's letter ({@link PanelFonts}).
  */
 public class GameMarginsPanel extends PluginPanel
 {
@@ -91,10 +89,7 @@ public class GameMarginsPanel extends PluginPanel
 		body.removeAll();
 		NumberFormat n = NumberFormat.getIntegerInstance();
 
-		JLabel title = new JLabel("GameMargins");
-		title.setFont(FontManager.getRunescapeBoldFont());
-		title.setForeground(Color.WHITE);
-		body.add(title);
+		body.add(label("GameMargins", PanelFonts.TITLE, Color.WHITE));
 		body.add(Box.createVerticalStrut(8));
 
 		if (!v.linked)
@@ -104,11 +99,7 @@ public class GameMarginsPanel extends PluginPanel
 			if (v.linkState == LinkFlow.State.WAITING && v.userCode != null)
 			{
 				body.add(text("On gamemargins.com/link, confirm this code:", Color.WHITE));
-				JLabel code = new JLabel(v.userCode, SwingConstants.CENTER);
-				code.setFont(new Font(Font.MONOSPACED, Font.BOLD, 22));
-				code.setForeground(Color.WHITE);
-				code.setAlignmentX(LEFT_ALIGNMENT);
-				body.add(code);
+				body.add(label(v.userCode, PanelFonts.CODE, Color.WHITE));
 				body.add(text("Waiting for you to confirm…", DIM));
 				body.add(Box.createVerticalStrut(6));
 				body.add(button("Open the page again", onOpenPage));
@@ -143,14 +134,11 @@ public class GameMarginsPanel extends PluginPanel
 			head.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 			head.setBorder(BorderFactory.createEmptyBorder(5, 8, 5, 8));
 			head.setAlignmentX(LEFT_ALIGNMENT);
-			JLabel account = new JLabel(v.accountName == null ? "Account" : v.accountName);
-			account.setForeground(Color.WHITE);
-			head.add(account, BorderLayout.CENTER);
+			head.add(label(v.accountName == null ? "Account" : v.accountName, PanelFonts.BODY, Color.WHITE), BorderLayout.CENTER);
 			if (v.todayProfit != null)
 			{
 				long profit = v.todayProfit;
-				JLabel today = new JLabel((profit > 0 ? "+" : "") + n.format(profit) + " today");
-				today.setForeground(profit > 0 ? GREEN : profit < 0 ? Color.RED : DIM);
+				JLabel today = label((profit > 0 ? "+" : "") + n.format(profit) + " today", PanelFonts.BODY, profit > 0 ? GREEN : profit < 0 ? Color.RED : DIM);
 				today.setToolTipText(v.todayTrades == null ? null : v.todayTrades + " trades sold today, profit after tax");
 				head.add(today, BorderLayout.EAST);
 			}
@@ -188,12 +176,9 @@ public class GameMarginsPanel extends PluginPanel
 				row.setBackground(ColorScheme.DARK_GRAY_COLOR);
 				row.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, ColorScheme.MEDIUM_GRAY_COLOR));
 				row.setAlignmentX(LEFT_ALIGNMENT);
-				JLabel name = new JLabel(v.nameOf.apply(w.getItemId()));
-				name.setForeground(Color.WHITE);
-				row.add(name, BorderLayout.CENTER);
+				row.add(label(v.nameOf.apply(w.getItemId()), PanelFonts.BODY, Color.WHITE), BorderLayout.CENTER);
 				String left = w.getLeft() < 0 ? n.format(w.getUsed()) + " bought" : w.getLeft() == 0 ? "full" : n.format(w.getLeft()) + " left";
-				JLabel when = new JLabel(left + " · " + CLOCK.format(Instant.ofEpochMilli(w.getResets())));
-				when.setForeground(w.getLeft() == 0 ? AMBER : DIM);
+				JLabel when = label(left + " · " + CLOCK.format(Instant.ofEpochMilli(w.getResets())), PanelFonts.BODY, w.getLeft() == 0 ? AMBER : DIM);
 				when.setToolTipText("Frees up in " + BuyLimits.until(w.getResets() - now));
 				row.add(when, BorderLayout.EAST);
 				body.add(row);
@@ -239,14 +224,11 @@ public class GameMarginsPanel extends PluginPanel
 		JPanel line = new JPanel(new BorderLayout(6, 0));
 		line.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 		line.setAlignmentX(LEFT_ALIGNMENT);
-		JLabel item = new JLabel(name);
-		item.setForeground(Color.WHITE);
 		// The name takes what the numbers leave, and is shortened with "…" when it doesn't fit.
-		line.add(item, BorderLayout.CENTER);
+		line.add(label(name, PanelFonts.BODY, Color.WHITE), BorderLayout.CENTER);
 		String state = s.isCancelled() ? "Cancelled" : s.isFinished() ? "Done" : s.isBuy() ? "Buy" : "Sell";
-		JLabel right = new JLabel(state + " " + n.format(s.getFilled()) + " / " + n.format(s.getQuantity()), SwingConstants.RIGHT);
-		right.setForeground(s.isCancelled() ? Color.RED : s.isFinished() ? GREEN : DIM);
-		line.add(right, BorderLayout.EAST);
+		Color stateColor = s.isCancelled() ? Color.RED : s.isFinished() ? GREEN : DIM;
+		line.add(label(state + " " + n.format(s.getFilled()) + " / " + n.format(s.getQuantity()), PanelFonts.BODY, stateColor), BorderLayout.EAST);
 		row.add(line);
 		ProgressBar bar = new ProgressBar();
 		bar.setMaximumValue(Math.max(1, s.getQuantity()));
@@ -258,35 +240,32 @@ public class GameMarginsPanel extends PluginPanel
 		bar.setAlignmentX(LEFT_ALIGNMENT);
 		row.add(Box.createVerticalStrut(3));
 		row.add(bar);
-		JLabel price = new JLabel(n.format(s.getPrice()) + " each");
-		price.setForeground(DIM);
-		price.setFont(FontManager.getRunescapeSmallFont());
-		price.setAlignmentX(LEFT_ALIGNMENT);
-		row.add(price);
+		row.add(label(n.format(s.getPrice()) + " each", PanelFonts.SMALL, DIM));
 		return row;
+	}
+
+	/** A line of text in one of the panel's letters ({@link PanelFonts}), lined up on the left. */
+	private static JLabel label(String s, Font font, Color color)
+	{
+		JLabel label = PanelFonts.use(new JLabel(s), font);
+		label.setForeground(color);
+		label.setAlignmentX(LEFT_ALIGNMENT);
+		return label;
 	}
 
 	private static JLabel section(String name)
 	{
-		JLabel label = new JLabel(name.toUpperCase());
-		label.setForeground(ColorScheme.BRAND_ORANGE);
-		label.setFont(FontManager.getRunescapeSmallFont());
-		label.setAlignmentX(LEFT_ALIGNMENT);
-		return label;
+		return label(name.toUpperCase(), PanelFonts.SECTION, ColorScheme.BRAND_ORANGE);
 	}
 
 	private static JLabel text(String s, Color color)
 	{
-		JLabel label = new JLabel("<html><div style='width:" + WRAP_WIDTH + "px'>" + escape(s) + "</div></html>");
-		label.setForeground(color);
-		label.setFont(FontManager.getRunescapeSmallFont());
-		label.setAlignmentX(LEFT_ALIGNMENT);
-		return label;
+		return label("<html><div style='width:" + WRAP_WIDTH + "px'>" + escape(s) + "</div></html>", PanelFonts.SMALL, color);
 	}
 
 	private static JButton button(String label, Runnable action)
 	{
-		JButton b = new JButton(label);
+		JButton b = PanelFonts.use(new JButton(label), PanelFonts.BUTTON);
 		b.setAlignmentX(LEFT_ALIGNMENT);
 		b.addActionListener(e -> action.run());
 		return b;
