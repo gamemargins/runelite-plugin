@@ -5,7 +5,7 @@ A RuneLite plugin that keeps your Grand Exchange trades and buy-limit timers on
 
 ## What it does
 
-- **Live slots.** Your eight Grand Exchange slots, as they fill, on the site's Trades page and in the plugin's side
+- **Live slots.** Your eight Grand Exchange slots, as they fill, on the site's Your trades page and in the plugin's side
   panel.
 - **Exact buy-limit timers.** Every purchase is noted the moment it fills, so the site and the panel know to the
   second how much of each 4-hour buy limit you have used and when it frees up. The offer setup screen shows the limit
@@ -60,15 +60,15 @@ Only a person can test a plugin in the game (RuneLite's rules; automating the ga
    - Place a buy offer in the Grand Exchange: within a few seconds it shows in the panel and on
      `gamemargins.com/osrs/trades` (the tab refreshes itself every 10 seconds).
    - Let it fill (or part of it): the panel's **Buy limits** list shows the item with what is left and when it resets;
-     the Trades page's Limits tile shows the same.
+     the Limits tile on Your trades shows the same.
    - Open the offer setup screen for a buy of the same item: the small GameMargins box under the window says how much
      of the limit is left and when it resets. For an item you haven't bought in 4 hours it says the limit is free.
-   - Sell what you bought: the Trades page shows the flip with its profit after tax, how long buying and selling took,
+   - Sell what you bought: Your trades shows the flip with its profit after tax, how long buying and selling took,
      and your buy price against the market. The panel's **today** figure comes from the site.
    - Cancel an offer that filled nothing: the slot shows "Cancelled" and the trades don't change. Cancel one that
      filled something: the filled part counts.
    - Log out, let an offer finish while logged out (or collect it on mobile), log back in: the plugin reports what it
-     found, marked as found at login; the Trades page shows the finished offer and the purchase counts from the login.
+     found, marked as found at login; Your trades shows the finished offer and the purchase counts from the login.
    - Hop to a Leagues, Deadman or beta world (when one is up): the panel says the world is not tracked and nothing is
      sent.
    - Unlink on the site (Account › Security): the panel says "Not linked any more" at its next sync and offers Link
